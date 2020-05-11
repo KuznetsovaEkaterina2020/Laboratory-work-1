@@ -1,0 +1,187 @@
+// Фигуры (лабораторная работа 1)
+// Кузнецова Е.А. Шалыгина А.В.
+
+#include <iostream>
+using namespace std;
+
+struct Points // создадим структуру, задающую координаты точек
+{
+    int x;
+    int y;
+};
+
+class Figure // создадим базовый класс, описывающий геометрическую фигуру
+{
+protected: // опишем защищённые члены класса, чтобы они могли наследоваться
+    Points* points = nullptr; // и быть доступными в любом порождённом классе
+    int* peaks = nullptr;
+public: // опишем общие члены класса, доступные из любой точки программы
+    Figure() {};
+    void SetPoints() // функция ввода точек
+    {
+        for (int i = 0; i < *peaks; i++)
+        {
+            cin >> points[i].x >> points[i].y;
+        }
+    }
+    virtual void GetName() {}; // функция присвоения названия фигуры
+    virtual float GetPerimeter() // функция подсчёта периметра
+    {
+        float* p = new float(0.0);
+        for (int i = 0; i < *peaks - 1; i++)
+        {
+            *p += sqrt(pow(points[i + 1].x - points[i].x, 2) + pow(points[i + 1].y - points[i].y, 2));
+        }
+        *p += sqrt(pow(points[*peaks - 1].x - points[0].x, 2) + pow(points[*peaks - 1].y - points[0].y, 2));
+        return *p;
+    }
+    virtual float GetArea() // функция подсчёта площади
+    {
+        float* s = new float(0.0);
+        for (int i = 0; i < *peaks - 1; i++)
+        {
+            *s += 0.5 * abs(points[i].x * points[i + 1].y - points[i + 1].x * points[i].y);
+        }
+        *s += 0.5 * abs(points[*peaks].x * points[0].y - points[0].x * points[*peaks].y);
+        return *s;
+    }
+    ~Figure() // деструктор класса фигуры
+    {
+        delete peaks; free(points);
+    }
+};
+
+class Rectangle : public Figure // создадим производный класс "прямоугольник"
+{
+protected: // защищённые члены класса
+    int* width = nullptr;
+    int* height = nullptr;
+public: // общие члены класса
+    Rectangle(int w, int h)
+    {
+        width = new int(w);
+        height = new int(h);
+    }
+    void GetName() // функция присвоения названия фигуры
+    {
+        cout << "Rectangle :" << endl;
+    }
+    virtual float GetPerimeter() // функция подсчёта периметра
+    {
+        return 2 * (*width + *height);
+    }
+    virtual float GetArea() // функция подсчёта площади
+    {
+        return *width * *height;
+    }
+    ~Rectangle() // деструктор класса
+    {
+        delete width;
+        delete height;
+    }
+};
+
+class Square : public Rectangle // создадим производный класс "квадрат"
+{
+public: // общие члены класса
+    Square(int side) : Rectangle(side, side) {};
+    void GetName() // функция присвоения названия фигуры
+    {
+        cout << "Square :" << endl;
+    }
+    float GetPerimeter() // функция подсчёта периметра
+    {
+        return 4 * *width;
+    }
+    float GetArea() // функция подсчёта площади
+    {
+        return pow(*width, 2);
+    }
+};
+
+class Circle : public Figure // создадим производный класс "круг"
+{
+private: // личные члены класса
+    int* r = nullptr;
+public: // общие члены класса
+    Circle(int radius)
+    {
+        this->r = new int(radius);
+    }
+    void GetName() // функция присвоения названия фигуры
+    {
+        cout << "Circle :" << endl;
+    }
+    float GetPerimeter() // функция подсчёта периметра
+    {
+        return 2 * 3.14 * *r;
+    }
+    float GetArea() // функция подсчёта площади
+    {
+        return 3.14 * pow(*r, 2);
+    }
+    ~Circle() // деструктор класса
+    {
+        delete r;
+    }
+};
+
+class Ellipse : public Figure // создадим производный класс "эллипс"
+{
+private: // личные члены класса
+    int* r = nullptr;
+    int* R = nullptr;
+public: // общие члены класса
+    Ellipse(int r, int R)
+    {
+        this->r = new int(r);
+        this->R = new int(R);
+    }
+    void GetName() // функция присвоения названия фигуры
+    {
+        cout << "Ellipse :" << endl;
+    }
+    float GetPerimeter() // функция подсчёта периметра
+    {
+        return 2 * 3.14 * sqrt(pow(*r, 2) * pow(*R, 2) / 2);
+    }
+    float GetArea() // функция подсчёта площади
+    {
+        return 3.14 * *r * *R;
+    }
+    ~Ellipse() // деструктор класса
+    {
+        delete r;
+        delete R;
+    }
+};
+
+int main() // основная функция программы
+{
+    setlocale(0, " ");
+    const int count = 200; // введём необходимое число фигур
+    Figure* figure[count];
+    for (int i = 0; i < count; i++) // заполняем массив фигурами
+    {
+        if (i % 2 == 0)
+            figure[i] = new Rectangle(i, i * 2);
+        else if (i % 3 == 0)
+            figure[i] = new Square(i);
+        else if (i % 5 == 0)
+            figure[i] = new Circle(i / 5);
+        else
+            figure[i] = new Ellipse(i / 2, i);
+    }
+    for (int i = 0; i < count; i++) // подсчёт необходимых характеристик фигуры
+    {
+        figure[i]->GetName();
+        cout << "P = " << figure[i]->GetPerimeter() << endl;
+        cout << "S = " << figure[i]->GetArea() << endl;
+        cout << "" << endl;
+    }
+    for (int i = 0; i < count; i++)
+    {
+        delete figure[i];
+    }
+    return 0;
+}
